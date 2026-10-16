@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 2 - MCD y MCM</title>
+
+    <!-- Tailwind CSS (via CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome para los Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <!-- Configuración de Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { fun: ['Nunito', 'sans-serif'] },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #0f172a; }
+        
+        @keyframes floatUp { 0% { transform: translateY(0) rotate(0); } 100% { transform: translateY(-120vh) rotate(360deg); } }
+        @keyframes floatAround { 0%, 100% { transform: translate(0,0) rotate(-5deg); } 25% { transform: translate(10px, -15px) rotate(5deg); } 50% { transform: translate(-5px, 10px) rotate(-2deg); } 75% { transform: translate(-15px, -5px) rotate(3deg); } }
+        @keyframes jellyPop { 0% { transform: scale(0.5); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        @keyframes slideInRight { 0% { opacity: 0; transform: translateX(30px); } 100% { opacity: 1; transform: translateX(0); } }
+        @keyframes wiggle { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        @keyframes confettiFall { 0% { transform: translate(0,0) rotate(0); } 100% { transform: translate(var(--tx), var(--ty)) rotate(var(--rot)); opacity: 0; } }
+        @keyframes starRadialExplosion { 0% { transform: scale(0) translate(0,0) rotate(0); opacity: 1; } 100% { transform: scale(var(--s)) translate(var(--tx), var(--ty)) rotate(var(--rot)); opacity: 0; } }
+        @keyframes pointsFloat { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-50px) scale(1.5); opacity: 0; } }
+        @keyframes floatScoreDeduction { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-30px) scale(1.2); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        
+        @keyframes robotFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes robotThinkTilt { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-5deg); } 75% { transform: rotate(5deg); } }
+        @keyframes robotJump { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        @keyframes robotTalkArmL { 0%, 100% { transform: rotate(45deg); } 50% { transform: rotate(70deg); } }
+        @keyframes robotTalkArmR { 0%, 100% { transform: rotate(-45deg); } 50% { transform: rotate(-70deg); } }
+        @keyframes spin-slow { 100% { transform: rotate(360deg); } }
+        @keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
+        @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 40px rgba(251,191,36,0.4); } 50% { box-shadow: 0 0 60px rgba(251,191,36,0.8); } }
+        @keyframes pulse-glow-indigo { 0%, 100% { box-shadow: 0 0 50px rgba(99,102,241,0.5); } 50% { box-shadow: 0 0 80px rgba(99,102,241,0.9); } }
+        @keyframes bounce-slight { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+        
+        .animate-floatUp { animation: floatUp linear infinite; }
+        .animate-floatAround { animation: floatAround 10s ease-in-out infinite; }
+        .animate-jellyPop { animation: jellyPop 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+        .animate-slideInRight { animation: slideInRight 0.4s ease-out forwards; }
+        .animate-wiggle { animation: wiggle 0.3s ease-in-out; }
+        .animate-confettiFall { animation: confettiFall ease-in forwards; }
+        .animate-starRadialExplosion { animation: starRadialExplosion cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        .animate-pointsFloat { animation: pointsFloat 1.5s ease-out forwards; }
+        .animate-floatScoreDeduction { animation: floatScoreDeduction 0.8s ease-out forwards; }
+        .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
+        .animate-gradientMove { animation: gradientMove 15s ease infinite; }
+        .animate-spin-slow { animation: spin-slow 8s linear infinite; }
+        .animate-spin-reverse { animation: spin-reverse 6s linear infinite; }
+        .animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+        .animate-pulse-glow-indigo { animation: pulse-glow-indigo 3s ease-in-out infinite; }
+        .animate-bounce-slight { animation: bounce-slight 2s ease-in-out infinite; }
+        
+        .background-size-200 { background-size: 200% 200%; }
+        .bg-ray-pattern { background: repeating-conic-gradient(from 0deg, transparent 0deg 15deg, rgba(251,191,36,0.5) 15deg 30deg); }
+        
+        .text-gradient-score-perfect { background: linear-gradient(to right, #fbbf24, #f59e0b); -webkit-background-clip: text; color: transparent; }
+        .text-gradient-score-dark { background: linear-gradient(to right, #475569, #1e293b); -webkit-background-clip: text; color: transparent; }
+        .metallic-gold { background: linear-gradient(to bottom, #fde047, #f59e0b); border-color: #b45309; color: #78350f; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4); border-radius: 4px; border: 2px solid transparent; background-clip: content-box;}
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: rgba(255,255,255,0.8); }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- React & ReactDOM (via CDN) -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel standalone para JSX en el navegador -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Código principal de la aplicación React -->
+    <script type="text/babel">
+        const { useState, useEffect, memo, useRef } = React;
+
+        // ==========================================
+        // SISTEMA DE AUDIO MEJORADO
+        // ==========================================
+        const AudioController = {
+          ctx: null, muted: false,
+          init: function() {
+            if (this.ctx) return;
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext) {
+              this.ctx = new AudioContext();
+              if (this.ctx.state === 'suspended') this.ctx.resume();
+            }
+          },
+          play: function(type) {
+            if (this.muted || !this.ctx) return;
+            if (this.ctx.state === 'suspended') this.ctx.resume();
+            const osc = this.ctx.createOscillator(); 
+            const gain = this.ctx.createGain();
+            osc.connect(gain); 
+            gain.connect(this.ctx.destination);
+            const now = this.ctx.currentTime;
+
+            if (type === 'hover') {
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(800, now);
+              osc.frequency.exponentialRampToValueAtTime(1200, now + 0.05);
+              gain.gain.setValueAtTime(0.03, now); 
+              gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+              osc.start(now); osc.stop(now + 0.05);
+            } else if (type === 'pop' || type === 'correct') {
+              osc.type = 'sine'; osc.frequency.setValueAtTime(450, now);
+              osc.frequency.exponentialRampToValueAtTime(700, now + 0.1);
+              gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+              osc.start(now); osc.stop(now + 0.1);
+            } else if (type === 'pop-reverse' || type === 'wrong') {
+              osc.type = 'triangle'; osc.frequency.setValueAtTime(600, now);
+              osc.frequency.exponentialRampToValueAtTime(250, now + 0.15);
+              gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+              osc.start(now); osc.stop(now + 0.15);
+            } else if (type === 'success' || type === 'levelUp') {
+              osc.type = 'square';
+              osc.frequency.setValueAtTime(400, now);
+              osc.frequency.setValueAtTime(600, now + 0.15);
+              osc.frequency.setValueAtTime(1000, now + 0.3);
+              osc.frequency.setValueAtTime(1500, now + 0.45);
+              gain.gain.setValueAtTime(0.15, now);
+              gain.gain.linearRampToValueAtTime(0, now + 0.8);
+              osc.start(now); osc.stop(now + 0.8);
+            } else if (type === 'swoosh') {
+              osc.type = 'sine'; osc.frequency.setValueAtTime(250, now);
+              osc.frequency.exponentialRampToValueAtTime(40, now + 0.2);
+              gain.gain.setValueAtTime(0.25, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+              osc.start(now); osc.stop(now + 0.2);
+            } else if (type === 'win') {
+              osc.disconnect();
+              const notes = [523.25, 659.25, 783.99, 1046.50];
+              notes.forEach((freq, i) => {
+                const o = this.ctx.createOscillator(); const g = this.ctx.createGain();
+                o.type = 'triangle'; o.frequency.value = freq;
+                o.connect(g); g.connect(this.ctx.destination);
+                const startTime = now + (i * 0.08);
+                g.gain.setValueAtTime(0, startTime); g.gain.linearRampToValueAtTime(0.2, startTime + 0.05);
+                g.gain.linearRampToValueAtTime(0, startTime + 0.4);
+                o.start(startTime); o.stop(startTime + 0.4);
+              });
+            }
+          },
+          toggleMute: function() { this.muted = !this.muted; return this.muted; }
+        };
+
+        // ==========================================
+        // GENERADOR DE EJERCICIOS DINÁMICO
+        // ==========================================
+        const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+
+        const generateDynamicQuiz = (id, count = 4) => {
+          const quiz = [];
+          let attempts = 0; 
+          while (quiz.length < count && attempts < 500) {
+            attempts++;
+            if (id === 'mcd_1') {
+              let a = Math.floor(Math.random() * 15) + 3;
+              let b = Math.floor(Math.random() * 15) + 3;
+              if (a !== b && gcd(a, b) === 1) {
+                 quiz.push({ q: `Calcula el MCD(${a}, ${b})`, a: '1', hint: 'PESI: No comparten divisores. La respuesta es siempre 1.' });
+              }
+            } else if (id === 'mcd_2') {
+              let b = Math.floor(Math.random() * 12) + 2;
+              let k = Math.floor(Math.random() * 6) + 2;
+              let a = b * k;
+              if (Math.random() > 0.5) [a, b] = [b, a]; 
+              quiz.push({ q: `Calcula el MCD(${a}, ${b})`, a: `${Math.min(a,b)}`, hint: `Múltiplo: ${Math.max(a,b)} contiene a ${Math.min(a,b)}. En MCD gana el menor.` });
+            } else if (id === 'mcd_3') {
+              let k = Math.floor(Math.random() * 8) + 2;
+              let a = Math.floor(Math.random() * 7) + 2;
+              let b = Math.floor(Math.random() * 7) + 2;
+              if (a !== b && gcd(a, b) === 1) {
+                let n1 = k * a, n2 = k * b;
+                quiz.push({ q: `Calcula el MCD(${n1}, ${n2})`, a: `${k}`, hint: `Ambos números son múltiplos de ${k}. Extráelo.` });
+              }
+            } else if (id === 'mcm_1') {
+              let b = Math.floor(Math.random() * 12) + 2;
+              let k = Math.floor(Math.random() * 6) + 2;
+              let a = b * k;
+              if (Math.random() > 0.5) [a, b] = [b, a]; 
+              quiz.push({ q: `Calcula el MCM(${a}, ${b})`, a: `${Math.max(a,b)}`, hint: `Múltiplo: En el MCM, siempre debes elegir el número mayor.` });
+            } else if (id === 'mcm_2') {
+              let a = Math.floor(Math.random() * 10) + 2;
+              let b = Math.floor(Math.random() * 10) + 2;
+              if (a !== b && gcd(a, b) === 1) {
+                 quiz.push({ q: `Calcula el MCM(${a}, ${b})`, a: `${a*b}`, hint: 'PESI: Como no tienen divisores comunes, ¡solo multiplícalos!' });
+              }
+            } else if (id === 'mcm_3') {
+              let k = Math.floor(Math.random() * 6) + 2;
+              let a = Math.floor(Math.random() * 5) + 2;
+              let b = Math.floor(Math.random() * 5) + 2;
+              if (a !== b && gcd(a, b) === 1) {
+                let n1 = k * a, n2 = k * b;
+                quiz.push({ q: `Calcula el MCM(${n1}, ${n2})`, a: `${k * a * b}`, hint: `Extrae el factor ${k} y multiplica por el resto (${a}×${b}).` });
+              }
+            }
+          }
+          return quiz;
+        };
+
+        const CHALLENGES_TEMPLATES = [
+          {
+            id: 'mcm_2', type: 'mcm', title: 'MCM: Propiedad PESI',
+            enunciado: 'Aprende qué hacer cuando dos números no tienen nada en común.',
+            points: 1000, imageUrl: 'https://images.unsplash.com/photo-1596495578065-6e0763fa1178?auto=format&fit=crop&w=600&q=80',
+            resolution: { ruleTitle: 'Propiedad 1: MCM PESI' }
+          },
+          {
+            id: 'mcm_1', type: 'mcm', title: 'MCM: Propiedad Múltiplo',
+            enunciado: 'Descubre al rey de los múltiplos cuando un número contiene a otro.',
+            points: 1000, imageUrl: 'https://images.unsplash.com/photo-1518133910546-b6c2fb7d79e3?auto=format&fit=crop&w=600&q=80',
+            resolution: { ruleTitle: 'Propiedad 2: MCM Múltiplos' }
+          },
+          {
+            id: 'mcm_3', type: 'mcm', title: 'MCM: Extracción de Factor',
+            enunciado: 'Extrae un factor en común para hacer que el MCM sea pan comido.',
+            points: 1000, imageUrl: 'https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&w=600&q=80',
+            resolution: { ruleTitle: 'Propiedad 3: MCM Extracción' }
+          },
+          {
+            id: 'mcd_1', type: 'mcd', title: 'MCD: Propiedad PESI',
+            enunciado: 'Si dos números son Primos Entre Sí (PESI), ¿cuál será su divisor máximo?',
+            points: 1000, imageUrl: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=600&q=80',
+            resolution: { ruleTitle: 'Propiedad 4: MCD PESI' }
+          },
+          {
+            id: 'mcd_2', type: 'mcd', title: 'MCD: Propiedad Múltiplo',
+            enunciado: '¿Qué pasa si un número es múltiplo de otro al buscar el MCD?',
+            points: 1000, imageUrl: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=600&q=80',
+            resolution: { ruleTitle: 'Propiedad 5: MCD Múltiplos' }
+          },
+          {
+            id: 'mcd_3', type: 'mcd', title: 'MCD: Extracción de Factor',
+            enunciado: '¿Cómo nos ayuda extraer un factor común a calcular el MCD más rápido?',
+            points: 1000, imageUrl: 'https://images.unsplash.com/photo-1614332287897-cdc485fa562d?auto=format&fit=crop&w=600&q=80',
+            resolution: { ruleTitle: 'Propiedad 6: MCD Extracción' }
+          }
+        ];
+
+        // ==========================================
+        // LÓGICA DE EXPLICACIONES ANIMADAS
+        // ==========================================
+        const getExplanationData = (id, step, playerName) => {
+          let maxSteps = 0;
+          let mathElements = [];
+          let text = "";
+          let currentExampleIndex = 1;
+
+          const mathClass = "text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-slate-800 whitespace-nowrap drop-shadow-sm";
+          const hlPink = "text-pink-500 drop-shadow-sm";
+          const hlIndigo = "text-indigo-600 drop-shadow-sm";
+          const hlEmerald = "text-emerald-500 drop-shadow-sm";
+
+          if (id === 'mcd_1') {
+            const pesiExamples = [
+              { n1: 8, n2: 15, b1: "2×2×2", b2: "3×5" },
+              { n1: 7, n2: 20, b1: "7", b2: "2×2×5" },
+              { n1: 9, n2: 25, b1: "3×3", b2: "5×5" }
+            ];
+            maxSteps = pesiExamples.length * 3 - 1; 
+            const exIdx = Math.floor(step / 3);
+            const subStep = step % 3;
+            const ex = pesiExamples[exIdx];
+            currentExampleIndex = exIdx + 1;
+
+            const texts = [
+              `¡Atención ${playerName}! Buscamos el MCD de ${ex.n1} y ${ex.n2}. ¿Tienen divisores en común?`,
+              "Si analizamos sus factores, ¡no comparten absolutamente nada! Son primos entre sí (PESI).",
+              `La regla de oro, ${playerName}: Si son PESI, su único divisor común siempre es el 1.`
+            ];
+
+            const stepsElements = [
+              <div className={mathClass}>MCD({ex.n1}, {ex.n2}) <span className="text-rose-500">= ?</span></div>,
+              <div className="flex items-center justify-center gap-2 sm:gap-4 text-xl sm:text-4xl font-bold my-2">
+                 <div className="bg-indigo-100 text-indigo-700 px-4 py-2 sm:px-6 sm:py-3 rounded-2xl border-4 border-indigo-300">{ex.n1} = {ex.b1}</div>
+                 <span className="text-rose-500 mx-1 sm:mx-2">vs</span>
+                 <div className="bg-emerald-100 text-emerald-700 px-4 py-2 sm:px-6 sm:py-3 rounded-2xl border-4 border-emerald-300">{ex.n2} = {ex.b2}</div>
+              </div>,
+              <div className={mathClass}>MCD({ex.n1}, {ex.n2}) = <span className="text-amber-500">1</span></div>
+            ];
+
+            mathElements = stepsElements.slice(0, subStep + 1);
+            text = texts[subStep];
+          } 
+          else if (id === 'mcd_2') {
+            const multExamples = [
+              { n1: 24, n2: 8, mult: 3 },
+              { n1: 45, n2: 15, mult: 3 },
+              { n1: 100, n2: 20, mult: 5 }
+            ];
+            maxSteps = multExamples.length * 3 - 1;
+            const exIdx = Math.floor(step / 3);
+            const subStep = step % 3;
+            const ex = multExamples[exIdx];
+            currentExampleIndex = exIdx + 1;
+
+            const texts = [
+              `Dime ${playerName}, ¿Qué pasa si un número es múltiplo exacto de otro?`,
+              `¡El ${ex.n1} contiene al ${ex.n2} exactamente ${ex.mult} veces! Es un múltiplo claro.`,
+              `En el MCD siempre 'gana' el número MENOR. ¡Así que la respuesta es ${ex.n2}! Fácil, ¿verdad?`
+            ];
+
+            const stepsElements = [
+              <div className={mathClass}>MCD({ex.n1}, {ex.n2}) <span className="text-rose-500">= ?</span></div>,
+              <div className="bg-pink-100 text-pink-700 px-6 py-3 rounded-2xl border-4 border-pink-300 text-3xl sm:text-5xl font-bold my-2">
+                {ex.n1} = {ex.n2} × {ex.mult}
+              </div>,
+              <div className={mathClass}>MCD({ex.n1}, <span className={hlPink}>{ex.n2}</span>) = <span className="text-amber-500">{ex.n2}</span></div>
+            ];
+
+            mathElements = stepsElements.slice(0, subStep + 1);
+            text = texts[subStep];
+          }
+          else if (id === 'mcd_3') {
+            const extExamples = [
+              { n1: 24, n2: 45, k: 3, a: 8, b: 15 },
+              { n1: 20, n2: 30, k: 10, a: 2, b: 3 },
+              { n1: 28, n2: 42, k: 14, a: 2, b: 3 }
+            ];
+            maxSteps = extExamples.length * 5 - 1;
+            const exIdx = Math.floor(step / 5);
+            const subStep = step % 5;
+            const ex = extExamples[exIdx];
+            currentExampleIndex = exIdx + 1;
+
+            const texts = [
+              `¡Usemos un truco, ${playerName}! Vamos a extraer un factor común de ${ex.n1} y ${ex.n2}.`,
+              `Ambos números son múltiplos de ${ex.k}. Los desarmamos mentalmente.`,
+              `¡Bien visto! El factor común ${ex.k} salta hacia afuera de la operación.`,
+              `Como ${ex.a} y ${ex.b} ya no tienen divisores comunes (PESI), su MCD es 1.`,
+              `¡Exacto! Multiplicamos por 1 y el MCD original es simplemente ${ex.k}.`
+            ];
+
+            const stepsElements = [
+              <div className={mathClass}>MCD({ex.n1}, {ex.n2})</div>,
+              <div className={mathClass}>= MCD(<span className={hlPink}>{ex.k}</span>×{ex.a}, <span className={hlPink}>{ex.k}</span>×{ex.b})</div>,
+              <div className={mathClass}>= <span className={`${hlPink}`}>{ex.k}</span> × MCD({ex.a}, {ex.b})</div>,
+              <div className={mathClass}>= <span className={hlPink}>{ex.k}</span> × <span className={hlIndigo}>1</span></div>,
+              <div className={mathClass}>= <span className="text-amber-500">{ex.k}</span></div>
+            ];
+
+            mathElements = stepsElements.slice(0, subStep + 1);
+            text = texts[subStep];
+          }
+          else if (id === 'mcm_1') {
+            const multMcmExamples = [
+              { n1: 14, n2: 7, mult: 2 },
+              { n1: 64, n2: 16, mult: 4 },
+              { n1: 120, n2: 12, mult: 10 }
+            ];
+            maxSteps = multMcmExamples.length * 3 - 1;
+            const exIdx = Math.floor(step / 3);
+            const subStep = step % 3;
+            const ex = multMcmExamples[exIdx];
+            currentExampleIndex = exIdx + 1;
+
+            const texts = [
+              `Ahora con el Mínimo Común Múltiplo, ${playerName}. ¿Qué ocurre si uno contiene al otro?`,
+              `El ${ex.n1} es múltiplo exacto de ${ex.n2}. ¡Lo contiene completamente!`,
+              `¡En el MCM el MAYOR se lleva la corona! La respuesta directa es ${ex.n1}.`
+            ];
+
+            const stepsElements = [
+              <div className={mathClass}>MCM({ex.n1}, {ex.n2}) <span className="text-rose-500">= ?</span></div>,
+              <div className="bg-emerald-100 text-emerald-700 px-6 py-3 rounded-2xl border-4 border-emerald-300 text-3xl sm:text-5xl font-bold my-2">{ex.n1} = {ex.n2} × {ex.mult}</div>,
+              <div className={mathClass}>MCM(<span className={hlEmerald}>{ex.n1}</span>, {ex.n2}) = <span className="text-amber-500">{ex.n1}</span></div>
+            ];
+
+            mathElements = stepsElements.slice(0, subStep + 1);
+            text = texts[subStep];
+          }
+          else if (id === 'mcm_2') {
+            const pesiMcmEx = [
+              { n1: 4, n2: 9, b1: "2×2", b2: "3×3", res: 36 },
+              { n1: 5, n2: 12, b1: "5", b2: "2×2×3", res: 60 },
+              { n1: 7, n2: 10, b1: "7", b2: "2×5", res: 70 }
+            ];
+            maxSteps = pesiMcmEx.length * 4 - 1;
+            const exIdx = Math.floor(step / 4);
+            const subStep = step % 4;
+            const ex = pesiMcmEx[exIdx];
+            currentExampleIndex = exIdx + 1;
+
+            const texts = [
+              `${playerName}, ¿Cómo hallamos el MCM de números que no tienen nada en común (PESI)?`,
+              "Analizamos sus divisores. Efectivamente, ¡nada en común!",
+              "La regla dice: si son PESI, la única forma de unirlos es multiplicarlos entre ellos.",
+              `¡Exacto! ${ex.n1} × ${ex.n2} = ${ex.res}. ¡Así de rápido!`
+            ];
+
+            const stepsElements = [
+              <div className={mathClass}>MCM({ex.n1}, {ex.n2}) <span className="text-rose-500">= ?</span></div>,
+              <div className="flex items-center justify-center gap-2 sm:gap-4 text-xl sm:text-4xl font-bold my-2">
+                 <div className="bg-indigo-100 text-indigo-700 px-4 py-2 sm:px-6 sm:py-3 rounded-2xl border-4 border-indigo-300">{ex.n1} = {ex.b1}</div>
+                 <span className="text-rose-500 mx-1 sm:mx-2">vs</span>
+                 <div className="bg-emerald-100 text-emerald-700 px-4 py-2 sm:px-6 sm:py-3 rounded-2xl border-4 border-emerald-300">{ex.n2} = {ex.b2}</div>
+              </div>,
+              <div className={mathClass}>MCM({ex.n1}, {ex.n2}) = <span className={hlIndigo}>{ex.n1} × {ex.n2}</span></div>,
+              <div className={mathClass}>= <span className="text-amber-500">{ex.res}</span></div>
+            ];
+
+            mathElements = stepsElements.slice(0, subStep + 1);
+            text = texts[subStep];
+          }
+          else if (id === 'mcm_3') {
+            const extMcmEx = [
+              { n1: 24, n2: 45, k: 3, a: 8, b: 15, pesiMcm: 120, res: 360 },
+              { n1: 20, n2: 30, k: 10, a: 2, b: 3, pesiMcm: 6, res: 60 },
+              { n1: 12, n2: 16, k: 4, a: 3, b: 4, pesiMcm: 12, res: 48 }
+            ];
+            maxSteps = extMcmEx.length * 5 - 1;
+            const exIdx = Math.floor(step / 5);
+            const subStep = step % 5;
+            const ex = extMcmEx[exIdx];
+            currentExampleIndex = exIdx + 1;
+
+            const texts = [
+              `¡Prepárate ${playerName}! Vamos a extraer factores para hacer este MCM súper fácil.`,
+              `Ambos son múltiplos de ${ex.k}. Los separamos como ${ex.k}×${ex.a} y ${ex.k}×${ex.b}.`,
+              `El factor común ${ex.k} salta hacia afuera de la operación.`,
+              `Como ${ex.a} y ${ex.b} quedaron como PESI, su MCM es simplemente su multiplicación: ${ex.pesiMcm}.`,
+              `Finalmente multiplicamos ${ex.k} × ${ex.pesiMcm} y obtenemos ${ex.res}. ¡Poder desbloqueado!`
+            ];
+
+            const stepsElements = [
+              <div className={mathClass}>MCM({ex.n1}, {ex.n2})</div>,
+              <div className={mathClass}>= MCM(<span className={hlEmerald}>{ex.k}</span>×{ex.a}, <span className={hlEmerald}>{ex.k}</span>×{ex.b})</div>,
+              <div className={mathClass}>= <span className={`${hlEmerald}`}>{ex.k}</span> × MCM({ex.a}, {ex.b})</div>,
+              <div className={mathClass}>= <span className={hlEmerald}>{ex.k}</span> × <span className={hlIndigo}>{ex.pesiMcm}</span></div>,
+              <div className={mathClass}>= <span className="text-amber-500">{ex.res}</span></div>
+            ];
+
+            mathElements = stepsElements.slice(0, subStep + 1);
+            text = texts[subStep];
+          }
+
+          text = `Ejemplo ${currentExampleIndex}: ` + text;
+          return { maxSteps, mathElements, text, currentExampleIndex };
+        };
+
+        // ==========================================
+        // COMPONENTES VISUALES
+        // ==========================================
+        const FloatingBackground = memo(() => {
+          const symbols = ['MCD', 'MCM', '÷', '×', '1', 'PESI', '✨', '🧠', 'A', 'B'];
+          const elements = Array.from({ length: 30 }).map((_, i) => ({
+            id: i, symbol: symbols[Math.floor(Math.random() * symbols.length)],
+            left: `${Math.random() * 100}%`, animationDuration: `${10 + Math.random() * 15}s`,
+            animationDelay: `-${Math.random() * 20}s`, fontSize: `${1 + Math.random() * 2.5}rem`,
+            opacity: 0.1 + Math.random() * 0.3
+          }));
+          return (
+            <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-800 to-fuchsia-900 opacity-80 animate-gradientMove background-size-200"></div>
+              {elements.map((el) => (
+                <div key={el.id} className="absolute text-fuchsia-200 font-black animate-floatUp select-none drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]"
+                  style={{ left: el.left, bottom: '-15%', fontSize: el.fontSize, opacity: el.opacity, animationDuration: el.animationDuration, animationDelay: el.animationDelay }}>
+                  {el.symbol}
+                </div>
+              ))}
+            </div>
+          );
+        });
+
+        const Confetti = memo(() => {
+          const colors = ['#fde047', '#60a5fa', '#f472b6', '#34d399', '#a78bfa', '#ff5722'];
+          const pieces = Array.from({ length: 60 }).map((_, i) => ({
+            id: i, left: `${Math.random() * 100}vw`, top: `${Math.random() * -10}vh`, color: colors[Math.floor(Math.random() * colors.length)],
+            tx: `${(Math.random() - 0.5) * 600}px`, ty: `${500 + Math.random() * 500}px`, rot: `${Math.random() * 720}deg`, delay: `${Math.random() * 0.4}s`,
+            duration: `${1.5 + Math.random() * 2}s`
+          }));
+          return (
+            <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
+              {pieces.map((p) => (
+                <div key={p.id} className="absolute w-3 h-3 md:w-4 md:h-4 rounded-sm animate-confettiFall shadow-sm"
+                  style={{ backgroundColor: p.color, '--tx': p.tx, '--ty': p.ty, '--rot': p.rot, animationDelay: p.delay, animationDuration: p.duration, left: p.left, top: p.top }} />
+              ))}
+            </div>
+          );
+        });
+
+        const GoldenStarsExplosion = memo(() => {
+          const stars = Array.from({ length: 24 }).map((_, i) => {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 80 + Math.random() * 180;
+            const size = 1.2 + Math.random() * 2;
+            return {
+              id: i, tx: `${Math.cos(angle) * distance}px`, ty: `${Math.sin(angle) * distance}px`,
+              rot: `${Math.random() * 360 + 360}deg`, delay: `${Math.random() * 0.15}s`,
+              size: `${size}rem`, sScale: 0.8 + Math.random() * 0.5
+            };
+          });
+          return (
+            <div className="absolute inset-0 pointer-events-none z-50 flex items-center justify-center overflow-visible">
+              {stars.map((s) => (
+                <div key={s.id} className="absolute animate-starRadialExplosion" style={{ '--tx': s.tx, '--ty': s.ty, '--rot': s.rot, '--s': s.sScale, animationDelay: s.delay, width: s.size, height: s.size }}>
+                  <svg viewBox="0 0 24 24" fill="#fbbf24" stroke="#f59e0b" strokeWidth="1" className="w-full h-full drop-shadow-[0_0_10px_rgba(251,191,36,0.9)]">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                </div>
+              ))}
+            </div>
+          );
+        });
+
+        const RobotAssistant = ({ isThinking, isHappy, isTalking }) => {
+          const getContainerAnim = () => { if (isThinking) return 'animate-robotThinkTilt'; if (isHappy) return 'animate-robotJump'; return 'animate-robotFloat'; };
+          const getArmLAnim = () => { if (isThinking) return 'rotate-[135deg]'; if (isHappy) return 'rotate-[150deg] animate-pulse'; if (isTalking) return 'animate-robotTalkArmL'; return 'rotate-45'; };
+          const getArmRAnim = () => { if (isThinking) return '-rotate-45'; if (isHappy) return '-rotate-[150deg] animate-pulse'; if (isTalking) return 'animate-robotTalkArmR'; return '-rotate-45'; };
+          
+          const getEyes = () => {
+            if (isThinking) return <div className="w-full flex justify-between px-2"><div className="w-3 h-1.5 bg-amber-500 rounded-full mt-1.5 rotate-[20deg]"></div><div className="w-3 h-1.5 bg-amber-500 rounded-full mt-1.5 -rotate-[20deg]"></div></div>; 
+            if (isHappy) return <div className="w-full flex justify-between px-1.5"><div className="w-4 h-2 bg-emerald-400 rounded-t-full mt-1"></div><div className="w-4 h-2 bg-emerald-400 rounded-t-full mt-1"></div></div>; 
+            return <div className="w-full flex justify-between px-1.5"><div className="w-4 h-4 bg-yellow-400 rounded-full animate-bounce"></div><div className="w-4 h-4 bg-yellow-400 rounded-full animate-bounce"></div></div>; 
+          };
+          const getMouth = () => {
+            if (isThinking) return <div className="w-2.5 h-2.5 bg-slate-700 rounded-full mt-2 translate-x-2"></div>; 
+            if (isHappy) return <div className="w-7 h-5 bg-rose-400 rounded-b-full mt-1.5"></div>; 
+            return <div className="w-4 h-5 bg-slate-700 rounded-full mt-1 animate-ping"></div>; 
+          };
+
+          return (
+            <div 
+              className={`relative flex flex-col items-center drop-shadow-lg transition-transform hover:scale-110 cursor-pointer ${getContainerAnim()}`}
+              onMouseEnter={() => AudioController.play('hover')}
+              onClick={() => AudioController.play('pop')}
+            >
+              <div className="relative z-0 flex flex-col items-center translate-y-1">
+                <div className={`w-4 h-4 rounded-full shadow-[0_0_12px_currentColor] z-10 transition-colors duration-300 ${isHappy ? 'text-emerald-400 bg-emerald-400' : isThinking ? 'text-amber-500 bg-amber-500 animate-ping' : 'text-yellow-400 bg-yellow-400 animate-pulse'}`}></div>
+                <div className="w-1.5 h-5 bg-slate-400"></div>
+              </div>
+              <div className="relative z-10 w-20 h-20 bg-gradient-to-br from-slate-100 to-slate-300 rounded-[1.8rem] border-[4px] border-slate-400 shadow-xl flex flex-col items-center justify-center p-2 transition-transform duration-300">
+                <div className="w-full h-full bg-slate-800 rounded-xl flex flex-col items-center justify-center p-1.5 shadow-inner border-2 border-slate-600 transition-all">
+                  {getEyes()}{getMouth()}
+                </div>
+              </div>
+              <div className={`absolute top-1/2 -left-3 w-4 h-6 bg-slate-300 border-[4px] border-slate-400 rounded-full z-0 origin-top transition-transform duration-300 ${getArmLAnim()}`}></div>
+              <div className={`absolute top-1/2 -right-3 w-4 h-6 bg-slate-300 border-[4px] border-slate-400 rounded-full z-0 origin-top transition-transform duration-300 ${getArmRAnim()}`}></div>
+            </div>
+          );
+        };
+
+        const AnimatedScore = ({ targetScore, isPerfect }) => {
+          const [score, setScore] = useState(0);
+
+          useEffect(() => {
+            let start = 0;
+            const duration = 1800;
+            const steps = 60;
+            const stepTime = Math.max(16, Math.floor(duration / steps));
+            const increment = targetScore / steps;
+
+            const timer = setInterval(() => {
+              start += increment;
+              if (start >= targetScore) {
+                setScore(targetScore);
+                clearInterval(timer);
+              } else {
+                setScore(Math.floor(start));
+              }
+            }, stepTime);
+
+            return () => clearInterval(timer);
+          }, [targetScore]);
+
+          return (
+            <span className={`text-[5.5rem] md:text-[6.5rem] font-black leading-none tracking-tighter transition-colors duration-500 ${isPerfect ? 'text-gradient-score-perfect drop-shadow-xl' : 'text-gradient-score-dark drop-shadow-lg'}`}>
+              {score}
+            </span>
+          );
+        };
+
+        // ==========================================
+        // WORKSPACE: EXPLICACIÓN
+        // ==========================================
+        function ExplanationWorkspace({ challenge, onComplete, setBotState, playerName }) {
+          const [step, setStep] = useState(0);
+          const scrollRef = useRef(null);
+          
+          const { maxSteps, mathElements, text, currentExampleIndex } = getExplanationData(challenge.id, step, playerName);
+
+          useEffect(() => {
+            setBotState({ msg: text, isTalking: true, isThinking: false, isHappy: step === maxSteps });
+          }, [step, text, maxSteps, setBotState]);
+
+          useEffect(() => {
+            if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+          }, [step]);
+
+          const nextStep = () => {
+            if (step < maxSteps) {
+              setStep(s => s + 1);
+              if (step + 1 === maxSteps) AudioController.play('success');
+              else AudioController.play('swoosh');
+            } else {
+              AudioController.play('levelUp');
+              onComplete();
+            }
+          };
+
+          const prevStep = () => {
+            if (step > 0) {
+              setStep(s => s - 1);
+              AudioController.play('pop-reverse');
+            }
+          };
+
+          return (
+            <div className="flex-1 w-full bg-white rounded-[1.5rem] sm:rounded-[2.5rem] border-[5px] sm:border-[8px] border-white shadow-[0_20px_50px_rgba(0,0,0,0.4)] flex flex-col overflow-hidden animate-fadeIn relative z-10 min-h-0">
+               <div ref={scrollRef} className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 relative bg-slate-50 overflow-visible w-full text-center scroll-smooth">
+                  <div className="absolute inset-0 opacity-5 bg-[radial-gradient(#475569_2px,transparent_2px)] [background-size:30px_30px] pointer-events-none"></div>
+                  
+                  <div className="w-full flex flex-col items-center justify-center transition-transform px-2 sm:px-4 max-w-full z-10 min-h-[16rem]">
+                     <div className="text-base sm:text-xl font-black text-slate-300 uppercase tracking-widest mb-6 w-full text-center flex items-center justify-center gap-4 select-none">
+                        <span className="w-8 sm:w-12 h-1 bg-slate-200 rounded-full"></span>
+                        <span className="text-slate-400 drop-shadow-sm">Ejemplo {currentExampleIndex}</span>
+                        <span className="w-8 sm:w-12 h-1 bg-slate-200 rounded-full"></span>
+                     </div>
+
+                     <div className="flex flex-col items-center w-full gap-3 sm:gap-4 mt-2">
+                        {mathElements.map((el, index) => {
+                          const isActive = index === mathElements.length - 1;
+                          return (
+                            <div 
+                              key={`${currentExampleIndex}-${index}`} 
+                              className={`transition-all duration-700 transform flex justify-center w-full ${isActive ? 'opacity-100 scale-100 animate-jellyPop z-10' : 'opacity-40 scale-[0.8] blur-[0.5px] pointer-events-none -mt-4 sm:-mt-6 z-0'}`}
+                            >
+                              {el}
+                            </div>
+                          );
+                        })}
+                     </div>
+                  </div>
+               </div>
+
+               <div className="shrink-0 bg-gradient-to-b from-[#eadef7] to-[#d6c1f0] p-4 sm:p-6 w-full flex flex-col items-center gap-4 border-t-[6px] border-white z-10">
+                  <div className="flex justify-center items-stretch w-full max-w-3xl gap-3 h-14 sm:h-16">
+                     <button 
+                       onMouseEnter={() => AudioController.play('hover')}
+                       onClick={prevStep} disabled={step === 0}
+                       className="flex-[0.8] bg-[#d8b4fe] border-b-[6px] border-[#a855f7] text-[#581c87] rounded-l-2xl rounded-r-xl font-black text-base sm:text-xl md:text-2xl flex items-center justify-center gap-1 active:border-b-0 active:translate-y-[6px] disabled:opacity-50 transition-all hover:bg-[#e9d5ff]"
+                     >
+                       <i className="fa-solid fa-chevron-left text-2xl sm:text-3xl"></i> <span className="hidden md:inline">Atrás</span>
+                     </button>
+
+                     <div className="bg-[#a855f7] text-white font-black px-4 sm:px-6 text-xl sm:text-2xl flex items-center justify-center rounded-2xl border-b-[6px] border-[#7e22ce] shadow-inner min-w-[4rem]">
+                        {step + 1}/{maxSteps + 1}
+                     </div>
+
+                     <button 
+                       onMouseEnter={() => AudioController.play('hover')}
+                       onClick={nextStep} 
+                       className="flex-[2] bg-gradient-to-r from-[#f59e0b] to-[#f97316] border-b-[6px] border-[#c2410c] text-white rounded-r-2xl rounded-l-xl font-black text-lg sm:text-2xl md:text-3xl flex items-center justify-center gap-2 active:border-b-0 active:translate-y-[6px] transition-all hover:brightness-110 shadow-sm"
+                     >
+                       {step < maxSteps ? (
+                         <>¡Siguiente! <i className="fa-solid fa-chevron-right text-2xl sm:text-3xl"></i></>
+                       ) : (
+                         <>¡A Practicar! <i className="fa-solid fa-arrow-right text-2xl sm:text-3xl"></i></>
+                       )}
+                     </button>
+                  </div>
+               </div>
+            </div>
+          );
+        }
+
+        // ==========================================
+        // WORKSPACE: PRÁCTICA
+        // ==========================================
+        function PropertyWorkspace({ challenge, dynamicQuiz, onComplete, onError, setBotState, playerName }) {
+          const { ruleTitle } = challenge.resolution;
+          const isMCD = challenge.type === 'mcd';
+
+          const [activeQuestion, setActiveQuestion] = useState(0);
+          const [userAnswer, setUserAnswer] = useState('');
+          const [feedbackStatus, setFeedbackStatus] = useState(null);
+          const [showPointsAnim, setShowPointsAnim] = useState(false);
+
+          useEffect(() => {
+            setBotState({ msg: `¡Es tu turno de brillar, ${playerName}! Escribe tu respuesta para el Reto ${activeQuestion + 1} y presiona Enter.`, isTalking: true, isThinking: false, isHappy: false });
+          }, [activeQuestion, setBotState, playerName]);
+
+          const checkAnswer = () => {
+            if (userAnswer === "") return;
+            const isCorrect = parseInt(userAnswer) === parseInt(dynamicQuiz[activeQuestion].a);
+            
+            if (isCorrect) {
+              AudioController.play('success'); 
+              setFeedbackStatus('success');
+              setShowPointsAnim(true);
+              setTimeout(() => setShowPointsAnim(false), 2000);
+              setBotState({ msg: `¡Lo lograste, ${playerName}! Excelente aplicación de la propiedad.`, isHappy: true });
+            } else {
+              AudioController.play('pop-reverse'); 
+              setFeedbackStatus('error');
+              setBotState({ msg: `Mmm, revisa bien la pista y vuelve a intentarlo, ${playerName}. Tú puedes.`, isThinking: true });
+              if (onError) onError(); 
+            }
+          };
+
+          const nextPractice = () => {
+            AudioController.play('pop');
+            setFeedbackStatus(null);
+            setUserAnswer('');
+            if (activeQuestion < dynamicQuiz.length - 1) {
+              setActiveQuestion(q => q + 1);
+            } else {
+              onComplete();
+            }
+          };
+
+          if (!dynamicQuiz || dynamicQuiz.length === 0) return null;
+
+          return (
+            <div className="flex-1 w-full bg-white rounded-[1.5rem] sm:rounded-[2.5rem] border-[5px] sm:border-[8px] border-white shadow-[0_20px_50px_rgba(0,0,0,0.4)] flex flex-col overflow-hidden animate-fadeIn relative z-10 min-h-0">
+               <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-4 sm:p-8 relative bg-slate-50 w-full text-center">
+                  <div className="absolute inset-0 opacity-5 bg-[radial-gradient(#475569_2px,transparent_2px)] [background-size:30px_30px] pointer-events-none"></div>
+                  
+                  {showPointsAnim && <GoldenStarsExplosion />}
+                  {showPointsAnim && (
+                    <div className="absolute top-10 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none z-50 animate-pointsFloat">
+                      <span className="text-4xl sm:text-5xl font-black text-amber-500 drop-shadow-[0_4px_4px_white]">+250</span>
+                    </div>
+                  )}
+
+                  <div className="w-full flex flex-col items-center justify-center transition-transform px-2 sm:px-4 max-w-full z-10 min-h-[16rem] py-8">
+                     <h4 className={`text-xl md:text-2xl font-black uppercase tracking-widest mb-8 px-4 py-2 rounded-2xl bg-white border-2 shadow-sm ${isMCD ? 'text-pink-500 border-pink-100' : 'text-emerald-500 border-emerald-100'}`}>
+                        {ruleTitle}
+                     </h4>
+
+                     <div className="flex flex-col items-center justify-center bg-white px-6 py-8 sm:px-12 sm:py-10 rounded-[2.5rem] shadow-[0_8px_30px_rgba(0,0,0,0.06)] border-[3px] border-slate-100 max-w-full relative z-10 w-full md:w-3/4 hover:shadow-xl transition-shadow">
+                        <p className="text-xl sm:text-3xl font-bold text-slate-700 mb-8 leading-snug break-words">
+                          {dynamicQuiz[activeQuestion].q}
+                        </p>
+
+                        <div className="flex items-center justify-center text-4xl sm:text-6xl md:text-7xl font-black whitespace-nowrap flex-wrap gap-x-3 sm:gap-x-6 gap-y-4">
+                          <span className="text-[#4f46e5] drop-shadow-sm">Rpta</span>
+                          <span className="text-[#f43f5e] drop-shadow-sm">=</span>
+                          
+                          {feedbackStatus === 'success' ? (
+                             <span className="text-[#10b981] animate-jellyPop inline-block text-center drop-shadow-sm px-4">{userAnswer}</span>
+                          ) : (
+                             <input 
+                               type="number" 
+                               value={userAnswer}
+                               onChange={(e) => {setUserAnswer(e.target.value); setFeedbackStatus(null);}}
+                               onKeyDown={(e) => e.key === 'Enter' && checkAnswer()}
+                               className={`w-32 sm:w-48 text-center bg-slate-50 border-b-[6px] rounded-2xl outline-none transition-all focus:border-emerald-400 focus:bg-emerald-50 ${feedbackStatus === 'error' ? 'border-rose-400 text-rose-500 animate-wiggle' : 'border-slate-200 text-[#10b981]'}`}
+                               autoFocus
+                             />
+                          )}
+                        </div>
+                        
+                        <div className="bg-slate-50 border-2 border-slate-100 rounded-xl p-4 mt-8 w-full transition-colors hover:bg-slate-100">
+                          <p className="text-slate-500 font-bold text-sm sm:text-base">
+                            💡 <span className="italic">Pista: {dynamicQuiz[activeQuestion].hint}</span>
+                          </p>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <div className="shrink-0 bg-gradient-to-b from-[#eadef7] to-[#d6c1f0] p-4 sm:p-6 w-full flex flex-col items-center gap-4 border-t-[6px] border-white z-10">
+                  <div className="flex justify-center items-stretch w-full max-w-3xl gap-3 h-14 sm:h-16">
+                     <div className="bg-[#a855f7] text-white font-black px-4 sm:px-6 text-xl sm:text-2xl flex items-center justify-center rounded-l-2xl rounded-r-xl border-b-[6px] border-[#7e22ce] shadow-inner min-w-[6rem]">
+                        Reto {activeQuestion + 1}/{dynamicQuiz.length}
+                     </div>
+
+                     {feedbackStatus !== 'success' ? (
+                       <button 
+                         onMouseEnter={() => AudioController.play('hover')}
+                         onClick={checkAnswer} 
+                         className="flex-[2] bg-[#10b981] border-b-[6px] border-[#047857] text-white rounded-r-2xl rounded-l-xl font-black text-lg sm:text-2xl md:text-3xl flex items-center justify-center gap-2 active:border-b-0 active:translate-y-[6px] transition-all hover:brightness-110 shadow-sm"
+                       >
+                         ¡Comprobar! <i className="fa-solid fa-star text-2xl"></i>
+                       </button>
+                     ) : (
+                       <button 
+                         onMouseEnter={() => AudioController.play('hover')}
+                         onClick={nextPractice} 
+                         className="flex-[2] bg-gradient-to-r from-[#f59e0b] to-[#f97316] border-b-[6px] border-[#c2410c] text-white rounded-r-2xl rounded-l-xl font-black text-lg sm:text-2xl md:text-3xl flex items-center justify-center gap-2 active:border-b-0 active:translate-y-[6px] transition-all hover:brightness-110 shadow-sm animate-pulse"
+                       >
+                         Siguiente Reto <i className="fa-solid fa-chevron-right text-2xl sm:text-3xl"></i>
+                       </button>
+                     )}
+                  </div>
+               </div>
+            </div>
+          );
+        }
+
+        // ==========================================
+        // VISTAS PRINCIPALES DEL JUEGO
+        // ==========================================
+        function MapView({ challenges, completed, gameScores, startChallenge }) {
+          return (
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 flex flex-col relative z-10 animate-fadeIn">
+              <h2 className="text-3xl md:text-5xl font-black text-white text-center drop-shadow-xl mb-8 tracking-tighter" style={{ textShadow: '0 4px 0 rgba(0,0,0,0.3)' }}>
+                MAPA DE ENTRENAMIENTO
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto w-full mb-8 pb-8">
+                {challenges.map((challenge, idx) => {
+                  const isDone = completed.includes(challenge.id);
+                  const score = gameScores[challenge.id];
+                  const isMCD = challenge.type === 'mcd';
+
+                  return (
+                    <div key={challenge.id} 
+                      onMouseEnter={() => AudioController.play('hover')}
+                      className={`relative flex flex-col bg-white rounded-3xl border-4 overflow-hidden shadow-2xl transition-all duration-300 group animate-floatAround cursor-pointer ${isDone ? 'border-amber-400 hover:shadow-amber-400/50 hover:scale-105' : 'border-white/50 hover:border-indigo-300 hover:scale-105 hover:shadow-indigo-500/50'}`}
+                      style={{ animationDelay: `${idx * -2}s` }}
+                    >
+                      <div className="h-44 w-full relative overflow-hidden bg-slate-800">
+                        <img src={challenge.imageUrl} alt={challenge.title} className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-125 opacity-90 ${isDone ? 'opacity-40 grayscale-[30%]' : ''}`} />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                        {isDone && <div className="absolute inset-0 bg-amber-500/30 backdrop-blur-[2px] flex items-center justify-center">
+                          <div className="bg-white p-3 rounded-full shadow-lg animate-jellyPop">
+                            <i className="fa-solid fa-check-circle text-5xl text-amber-500"></i>
+                          </div>
+                        </div>}
+                        <div className="absolute bottom-4 left-4 right-4">
+                          <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2 shadow-md ${isMCD ? 'bg-pink-500 text-white' : 'bg-emerald-500 text-white'}`}>
+                            {isMCD ? <i className="fa-solid fa-shield text-xs"></i> : <i className="fa-solid fa-rocket text-xs"></i>} {isMCD ? 'MCD' : 'MCM'}
+                          </span>
+                          <h3 className="text-white font-black text-2xl drop-shadow-lg leading-tight">{challenge.title}</h3>
+                        </div>
+                      </div>
+                      
+                      <div className="p-6 flex flex-col flex-1 bg-gradient-to-b from-white to-slate-50">
+                        <p className="text-sm font-bold text-slate-500 mb-6 line-clamp-2">{challenge.enunciado}</p>
+                        
+                        <div className="mt-auto flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">Recompensa</span>
+                            <span className="text-indigo-500 font-black flex items-center gap-1 text-lg"><i className="fa-solid fa-star text-base"></i> {challenge.points} XP</span>
+                          </div>
+                          
+                          {isDone ? (
+                            <div className="flex flex-col items-end">
+                               <span className="text-[10px] uppercase font-black tracking-widest text-amber-500">Logrado</span>
+                               <span className="text-amber-600 font-black flex items-center gap-1 text-xl"><i className="fa-solid fa-trophy text-lg"></i> {score} XP</span>
+                            </div>
+                          ) : (
+                            <button 
+                              onClick={() => {
+                                AudioController.play('pop');
+                                startChallenge(idx);
+                              }} 
+                              className={`text-white px-6 py-3 rounded-xl font-black transition-colors flex items-center gap-2 shadow-md hover:-translate-y-1 active:translate-y-0 active:scale-95 ${isMCD ? 'bg-pink-500 hover:bg-pink-400' : 'bg-emerald-500 hover:bg-emerald-400'}`}
+                            >
+                              Jugar <i className="fa-solid fa-play text-lg"></i>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        }
+
+        function ChallengeView({ challengeTemplate, setGameState, gameScores, setGameScores, setCompletedChallenges, completedChallenges, setBotState, playerName, activeScore, setActiveScore, setScoreFlash, scoreFlash }) {
+          const [isLevelComplete, setIsLevelComplete] = useState(false);
+          const [phase, setPhase] = useState('explanation');
+          const [dynamicQuiz, setDynamicQuiz] = useState([]);
+
+          useEffect(() => {
+            setIsLevelComplete(false);
+            setPhase('explanation');
+            if (challengeTemplate) {
+              setDynamicQuiz(generateDynamicQuiz(challengeTemplate.id, 4));
+            }
+          }, [challengeTemplate]);
+
+          const handleChallengeComplete = () => {
+            setIsLevelComplete(true); AudioController.play('win');
+            setGameScores(prev => ({ ...prev, [challengeTemplate.id]: activeScore }));
+            if (activeScore === challengeTemplate.points) setBotState({ msg: `¡FANTÁSTICO, ${playerName}! 🌟 ¡Un puntaje perfecto! Tienes cerebro de genio matemático.`, isHappy: true });
+            else setBotState({ msg: `¡MISIÓN SUPERADA, ${playerName}! 🎉 ¡Excelente esfuerzo! Tienes la propiedad dominada.`, isHappy: true });
+            if (!completedChallenges.includes(challengeTemplate.id)) setCompletedChallenges([...completedChallenges, challengeTemplate.id]);
+          };
+
+          const handleError = () => {
+            setActiveScore(s => Math.max(0, s - 50)); 
+            setScoreFlash(true);
+            setTimeout(() => setScoreFlash(false), 800);
+          };
+
+          const isPerfect = activeScore === challengeTemplate.points;
+
+          return (
+            <div className="flex-1 flex flex-col p-2 sm:p-4 overflow-hidden relative z-10 w-full max-w-6xl mx-auto">
+              {!isLevelComplete && (
+                <div className="flex justify-between items-center mb-4 px-2 shrink-0">
+                  <button
+                    onMouseEnter={() => AudioController.play('hover')}
+                    onClick={() => {
+                      AudioController.play('pop');
+                      setGameState('map');
+                      setBotState({ msg: "¿Pausa estratégica? Elige tu siguiente misión en el mapa.", isHappy: false, isThinking: false });
+                    }}
+                    className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl backdrop-blur-sm font-bold flex items-center gap-2 transition-all border border-white/30 shadow-md active:scale-95"
+                  >
+                    <i className="fa-solid fa-arrow-left text-lg"></i> <span className="hidden sm:inline">Abandonar Reto</span>
+                  </button>
+                  
+                  <div className={`bg-white px-5 py-2 rounded-xl font-black text-xl flex items-center gap-2 border-b-4 transition-colors relative ${scoreFlash ? 'border-rose-500 text-rose-500 bg-rose-50' : 'border-indigo-200 text-indigo-700 shadow-md'}`}>
+                    <i className={`fa-solid fa-star text-2xl ${scoreFlash ? 'text-rose-500' : 'text-amber-400'}`}></i>
+                    {activeScore} <span className="text-sm opacity-60">XP</span>
+                    {scoreFlash && <span className="absolute top-10 right-2 text-rose-500 font-black text-xl animate-floatScoreDeduction drop-shadow-md z-50">-50</span>}
+                  </div>
+                </div>
+              )}
+
+              {!isLevelComplete ? (
+                phase === 'explanation' ? (
+                  <ExplanationWorkspace challenge={challengeTemplate} onComplete={() => setPhase('practice')} setBotState={setBotState} playerName={playerName} />
+                ) : (
+                  <PropertyWorkspace challenge={challengeTemplate} dynamicQuiz={dynamicQuiz} onComplete={handleChallengeComplete} onError={handleError} setBotState={setBotState} playerName={playerName} />
+                )
+              ) : (
+                <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center justify-center animate-jellyPop z-20 p-4">
+                  <Confetti />
+                  <div className="bg-gradient-to-br from-white to-amber-50 p-8 md:p-12 rounded-[3rem] border-[6px] border-amber-400 shadow-[0_0_50px_rgba(251,191,36,0.4)] flex flex-col items-center max-w-2xl w-full text-center relative overflow-hidden my-auto animate-pulse-glow">
+                    
+                    <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-ray-pattern opacity-10 animate-spin-slow pointer-events-none"></div>
+                    
+                    <div className="bg-gradient-to-b from-amber-300 to-amber-500 p-5 rounded-full mb-6 shadow-[0_10px_20px_rgba(245,158,11,0.5)] border-4 border-amber-100 z-10 relative animate-bounce-slight">
+                      <i className="fa-solid fa-trophy text-6xl text-white drop-shadow-md"></i>
+                      <i className="fa-solid fa-wand-magic-sparkles absolute -top-3 -right-3 text-3xl text-yellow-200 animate-spin-slow drop-shadow-sm"></i>
+                      <i className="fa-solid fa-wand-magic-sparkles absolute -bottom-1 -left-2 text-xl text-yellow-100 animate-spin-reverse drop-shadow-sm"></i>
+                    </div>
+                    
+                    <h2 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-orange-600 mb-2 tracking-tight relative z-10 drop-shadow-sm uppercase">
+                      ¡Nivel Superado!
+                    </h2>
+                    <p className="text-2xl text-slate-600 font-black mb-8 relative z-10 px-4 py-1 bg-amber-100/50 rounded-xl border border-amber-200 shadow-sm">{challengeTemplate.resolution.ruleTitle}</p>
+                    
+                    <div className="flex flex-col items-center mb-10 relative z-10 bg-white/60 p-6 rounded-3xl border-2 border-white backdrop-blur-sm shadow-inner w-full">
+                      <span className="text-sm md:text-base uppercase tracking-widest font-black text-amber-500 mb-1">XP Ganada</span>
+                      <AnimatedScore targetScore={activeScore} isPerfect={isPerfect} />
+                      <span className="text-xl sm:text-2xl font-black text-slate-400 mt-[-5px]">PUNTOS DE EXPERIENCIA</span>
+                    </div>
+
+                    <button
+                      onMouseEnter={() => AudioController.play('hover')}
+                      onClick={() => {
+                        AudioController.play('pop');
+                        setGameState('map');
+                        setBotState({ msg: "¡Adelante! Selecciona otro reto en el mapa para seguir sumando poder mental. ⚡", isHappy: true });
+                      }}
+                      className="group bg-gradient-to-r from-emerald-400 to-emerald-600 border-b-[6px] border-emerald-800 text-white px-8 py-5 rounded-[2rem] font-black text-xl transition-all hover:-translate-y-2 hover:shadow-[0_10px_20px_rgba(16,185,129,0.4)] active:translate-y-1 active:border-b-0 flex items-center gap-3 w-full sm:w-auto justify-center relative z-10 active:scale-95"
+                    >
+                      <span className="group-hover:scale-110 transition-transform">Volver al Mapa</span> <i className="fa-solid fa-map text-2xl group-hover:rotate-12 transition-transform"></i>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        function ResultView({ gameScores, maxPossibleScore, resetGame }) {
+          const totalScore = Object.values(gameScores).reduce((a, b) => a + b, 0);
+          const percentage = (totalScore / maxPossibleScore) * 100;
+
+          return (
+            <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-4 z-20 animate-fadeIn relative">
+              <Confetti />
+              <div className="bg-gradient-to-br from-indigo-900/95 to-purple-900/95 backdrop-blur-xl p-8 md:p-14 rounded-[3rem] border-8 border-indigo-400 shadow-[0_0_60px_rgba(99,102,241,0.5)] flex flex-col items-center max-w-2xl w-full text-center my-10 animate-pulse-glow-indigo">
+                
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.1)_0%,transparent_70%)] pointer-events-none"></div>
+
+                <div className="bg-gradient-to-b from-indigo-400 to-purple-500 p-6 rounded-full mb-8 border-4 border-indigo-200 shadow-[0_0_30px_rgba(168,85,247,0.6)] relative animate-bounce-slight z-10">
+                  <i className="fa-solid fa-award text-[6rem] text-white drop-shadow-lg"></i>
+                  <i className="fa-solid fa-wand-magic-sparkles absolute -top-4 -right-4 text-4xl text-yellow-300 animate-spin-slow"></i>
+                </div>
+                
+                <h2 className="text-5xl md:text-6xl font-black text-white mb-2 tracking-tight drop-shadow-md z-10 uppercase">
+                  ¡Misión Exitosa!
+                </h2>
+                <p className="text-2xl text-indigo-300 font-bold mb-8 z-10">Has completado el entrenamiento del Aula 2</p>
+
+                <div className="w-full bg-white/10 backdrop-blur-md rounded-[2.5rem] p-8 mb-10 border border-white/20 flex flex-col items-center shadow-2xl z-10 hover:bg-white/20 transition-colors">
+                  <span className="text-sm md:text-base uppercase tracking-widest font-black text-indigo-300 mb-2">Puntuación Final Agente</span>
+                  <div className="flex items-end gap-2 text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)] mb-6">
+                    <span className="text-8xl font-black leading-none animate-jellyPop">{totalScore}</span>
+                    <span className="text-3xl font-bold mb-3 text-indigo-200">/ {maxPossibleScore}</span>
+                  </div>
+                  
+                  <div className="w-full bg-black/40 h-6 rounded-full overflow-hidden shadow-inner relative border border-white/10">
+                    <div 
+                      className={`h-full rounded-full transition-all duration-[2000ms] relative overflow-hidden ${percentage === 100 ? 'bg-gradient-to-r from-yellow-300 to-amber-500' : 'bg-gradient-to-r from-emerald-300 to-emerald-500'}`}
+                      style={{ width: `${percentage}%` }}
+                    >
+                       <div className="absolute inset-0 bg-white/20 w-full h-full animate-[shimmer_2s_infinite]"></div>
+                    </div>
+                  </div>
+                  <div className="mt-5 text-xl font-black text-white drop-shadow-sm">
+                     {percentage === 100 ? '🏆 ¡RENDIMIENTO PERFECTO! 🏆' : percentage >= 80 ? '🌟 ¡MAGNÍFICO DOMINIO! 🌟' : '💪 ¡GRAN ESFUERZO, AGENTE! 💪'}
+                  </div>
+                </div>
+
+                <button
+                  onMouseEnter={() => AudioController.play('hover')}
+                  onClick={resetGame}
+                  className="group metallic-gold w-full py-5 rounded-[2rem] font-black text-2xl transition-all border-b-[8px] flex items-center justify-center gap-4 uppercase tracking-widest active:translate-y-[8px] active:border-b-0 shadow-[0_15px_30px_rgba(0,0,0,0.3)] hover:brightness-110 z-10 active:scale-95"
+                >
+                  <i className="fa-solid fa-rotate-right text-3xl group-hover:rotate-180 transition-transform duration-500"></i> Jugar de Nuevo
+                </button>
+              </div>
+            </div>
+          );
+        }
+
+        // ==========================================
+        // COMPONENTE PRINCIPAL 
+        // ==========================================
+        function App() {
+          const [gameState, setGameState] = useState('map'); 
+          const [gameScores, setGameScores] = useState({});
+          const [completedChallenges, setCompletedChallenges] = useState([]);
+          
+          const [activeChallengeIdx, setActiveChallengeIdx] = useState(null);
+          const [activeScore, setActiveScore] = useState(0);
+          const [scoreFlash, setScoreFlash] = useState(false);
+
+          const playerName = "Agente"; 
+          const maxPossibleScore = CHALLENGES_TEMPLATES.reduce((acc, curr) => acc + curr.points, 0);
+
+          const [botState, setBotState] = useState({
+            msg: "¡Bienvenido al Aula 2, Agente! Selecciona una misión en el mapa para empezar a dominar el MCD y MCM.",
+            isTalking: false,
+            isThinking: false,
+            isHappy: true
+          });
+
+          // Inicialización Global de Audio con primera interacción
+          useEffect(() => {
+            const initAudio = () => {
+              AudioController.init();
+              window.removeEventListener('click', initAudio);
+              window.removeEventListener('touchstart', initAudio);
+            };
+            window.addEventListener('click', initAudio);
+            window.addEventListener('touchstart', initAudio);
+            return () => {
+              window.removeEventListener('click', initAudio);
+              window.removeEventListener('touchstart', initAudio);
+            };
+          }, []);
+
+          const resetGame = () => {
+            AudioController.play('pop');
+            setGameScores({});
+            setCompletedChallenges([]);
+            setGameState('map');
+            setBotState({
+              msg: `¡Genial! Mapa reiniciado. Selecciona tu próxima práctica.`,
+              isHappy: true,
+              isThinking: false
+            });
+          };
+
+          const startChallenge = (idx) => {
+            AudioController.play('pop');
+            setActiveChallengeIdx(idx);
+            setActiveScore(CHALLENGES_TEMPLATES[idx].points);
+            setGameState('challenge');
+            setBotState({
+              msg: `Iniciando: ${CHALLENGES_TEMPLATES[idx].title}. Presta mucha atención a los ejemplos y pasos.`,
+              isThinking: false,
+              isHappy: false
+            });
+          };
+
+          return (
+             <div className="h-screen w-full font-fun text-slate-800 flex flex-col overflow-hidden relative">
+                <FloatingBackground />
+                
+                {/* Cabecera / Status Bar */}
+                <header className="shrink-0 p-3 md:p-4 flex justify-between items-center z-20 bg-indigo-950/40 backdrop-blur-md border-b border-white/10 shadow-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-600 rounded-full flex items-center justify-center border-2 border-indigo-200 shadow-[0_0_15px_rgba(167,139,250,0.5)]">
+                      <i className="fa-solid fa-brain text-white animate-pulse"></i>
+                    </div>
+                    <div>
+                      <div className="text-white font-black text-base md:text-lg leading-tight">{playerName}</div>
+                      <div className="text-indigo-300 text-[10px] md:text-xs font-bold uppercase tracking-widest">Estudiante</div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-4">
+                    <div className="hidden sm:flex flex-col items-end">
+                      <span className="text-indigo-300 text-[10px] uppercase font-black tracking-widest">Puntuación Total</span>
+                      <span className="text-yellow-400 font-black text-xl leading-tight drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]">
+                        {Object.values(gameScores).reduce((a, b) => a + b, 0)} XP
+                      </span>
+                    </div>
+                    
+                    {gameState === 'map' && completedChallenges.length === CHALLENGES_TEMPLATES.length && (
+                       <button 
+                         onMouseEnter={() => AudioController.play('hover')}
+                         onClick={() => { AudioController.play('pop'); setGameState('result'); }} 
+                         className="bg-amber-500 hover:bg-amber-400 text-white border-b-4 border-amber-700 px-4 py-2 rounded-xl font-black flex items-center gap-2 active:translate-y-1 active:border-b-0 transition-all text-sm shadow-md active:scale-95"
+                       >
+                         <i className="fa-solid fa-award text-sm"></i> Ver Reporte
+                       </button>
+                    )}
+
+                    <button 
+                      onMouseEnter={() => AudioController.play('hover')}
+                      onClick={() => { AudioController.play('pop'); AudioController.toggleMute(); }} 
+                      className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/30 flex items-center justify-center text-white backdrop-blur-sm transition-all border border-white/10 shadow-md active:scale-90"
+                    >
+                      {AudioController.muted ? <i className="fa-solid fa-volume-xmark text-lg"></i> : <i className="fa-solid fa-volume-high text-lg"></i>}
+                    </button>
+                  </div>
+                </header>
+
+                {/* Zona Principal de Contenido */}
+                <main className="flex-1 overflow-hidden relative z-10 w-full flex flex-col">
+                  {gameState === 'map' && <MapView challenges={CHALLENGES_TEMPLATES} completed={completedChallenges} gameScores={gameScores} startChallenge={startChallenge} />}
+                  {gameState === 'challenge' && <ChallengeView challengeTemplate={CHALLENGES_TEMPLATES[activeChallengeIdx]} setGameState={setGameState} gameScores={gameScores} setGameScores={setGameScores} setCompletedChallenges={setCompletedChallenges} completedChallenges={completedChallenges} setBotState={setBotState} playerName={playerName} activeScore={activeScore} setActiveScore={setActiveScore} setScoreFlash={setScoreFlash} scoreFlash={scoreFlash} />}
+                  {gameState === 'result' && <ResultView gameScores={gameScores} maxPossibleScore={maxPossibleScore} resetGame={resetGame} />}
+                </main>
+
+                {/* FOOTER FIJO: Asistente Robot */}
+                <footer className="shrink-0 w-full bg-indigo-950/80 backdrop-blur-md border-t border-indigo-500/30 p-3 md:p-4 z-30 flex justify-center shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+                  <div className="bg-white/95 backdrop-blur-lg p-3 md:p-4 rounded-[2rem] border-4 border-indigo-100 shadow-xl flex items-center gap-4 w-full max-w-4xl transition-transform transform">
+                    <div className="shrink-0 scale-75 md:scale-90 origin-bottom">
+                       <RobotAssistant isThinking={botState.isThinking} isHappy={botState.isHappy} isTalking={botState.isTalking} />
+                    </div>
+                    <div className="flex-1 flex flex-col justify-center">
+                      <div className="text-[10px] md:text-xs uppercase font-black tracking-widest text-indigo-400 mb-0.5 flex items-center gap-1">
+                         <i className="fa-solid fa-bolt text-xs text-indigo-400"></i> Asistente Profe-Bot
+                      </div>
+                      <p className="text-slate-700 font-bold leading-tight text-sm md:text-lg">
+                        {botState.msg}
+                      </p>
+                    </div>
+                  </div>
+                </footer>
+             </div>
+          );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
